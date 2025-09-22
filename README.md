@@ -333,6 +333,42 @@ ulimit -n 200000
 sudo sysctl -w net.ipv4.ip_local_port_range="1025 65534"
 ```
 
+## Huawei Cloud IoT Support
+
+This fork includes enhanced support for Huawei Cloud IoT Platform testing:
+
+### Device ID Support
+Use `%d` in topics to represent device ID:
+```sh
+./emqtt_bench pub \
+    -t '$oc/devices/%d/sys/properties/report' \
+    -u 'Speaker-%i' \
+    --device-id 'Device-%i'  # Optional, defaults to username
+```
+See `DEVICE_ID_GUIDE.md` for detailed documentation.
+
+### Native Erlang Authentication
+Use `--huawei-auth` option with password format `huawei:<secret>`:
+```sh
+./emqtt_bench pub \
+    -h mqtt.huaweicloud.com \
+    -p 1883 \
+    -c 100 \
+    -t '$oc/devices/%u/sys/properties/report' \
+    -u 'Speaker-%i' \
+    -P 'huawei:12345678' \
+    --huawei-auth \
+    -s 256
+```
+
+See `HUAWEI_ERLANG_AUTH_GUIDE.md` for detailed documentation.
+
+### Python Helper Scripts
+- `huawei/payload_generator.py` - Generate test payloads
+- `huawei/run_huawei_cloud_test.py` - Wrapper script for testing
+
+See `HUAWEI_CLOUD_TEST_GUIDE.md` for more information.
+
 ## Author
 
 EMQX Team.

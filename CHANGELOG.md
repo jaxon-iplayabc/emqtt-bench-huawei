@@ -1,5 +1,56 @@
 # emqtt-bench changelog
 
+## 时间戳修复 (2024-11-19) - by Jaxon
+
+### Bug 修复
+- **修复华为云认证时间戳问题**：
+  - 问题：Erlang 模块使用 UTC 时间，而 Python 使用本地时间，导致时间戳不一致
+  - 修复：将 `huawei_auth:get_timestamp/0` 改为使用 `calendar:local_time()`
+  - 影响：修复后可以正确连接华为云 IoT 平台
+
+## 华为云集成更新 (2024-11-18) - by Jaxon
+
+### 新增功能
+
+#### Device ID 参数支持
+- Topic 新增 `%d` 变量支持，用于表示设备ID
+- 添加 `--device-id` 命令行选项，可明确指定设备ID
+- device_id 默认使用 username 的值，提供灵活性
+- 支持在 device_id 中使用 `%i` 和 `%rand_N` 变量
+- 新增文档 `DEVICE_ID_GUIDE.md` 详细说明使用方法
+
+#### 华为云认证逻辑修正
+- **重要修正**：华为云认证时，MQTT username 现在正确使用 device_id
+- 当使用 `--huawei-auth` 时：
+  - 如果指定了 `--device-id`，MQTT username 使用 device_id 的值
+  - 如果未指定 `--device-id`，MQTT username 使用 `-u` 的值
+  - 这确保符合华为云要求：username 必须是设备ID
+- 新增文档 `HUAWEI_AUTH_CORRECTION.md` 说明认证机制
+
+### 原有新增功能
+- 添加华为云 IoT 平台设备属性上报支持
+  - Topic 格式：`$oc/devices/{device_id}/sys/properties/report`
+  - 支持复杂的 JSON 数组 payload 格式
+- 新增 Python 辅助脚本
+  - `huawei/payload_generator.py`：生成符合华为云格式的随机测试数据
+  - `huawei/run_huawei_cloud_test.py`：简化华为云测试的包装脚本
+- 新增配置文件
+  - `huawei_cloud_topics.json`：华为云设备属性上报的 topics_payload 配置
+  - `huawei_cloud_payload_template.json`：payload 模板文件
+- 新增文档
+  - `HUAWEI_CLOUD_TEST_GUIDE.md`：详细的华为云测试指南
+  - `HUAWEI_ERLANG_AUTH_GUIDE.md`：Erlang 原生认证使用指南
+
+### 改进
+- 增强了对华为云设备认证机制的支持
+- 提供了多种测试方法和场景示例
+- **新增 Erlang 原生实现华为云认证**
+  - 添加 `src/huawei_auth.erl` 模块
+  - 支持 `--huawei-auth` 命令行选项
+  - 密码支持 `huawei:<secret>` 格式，自动生成 HMAC-SHA256 加密密码
+  - ClientID 自动生成符合华为云格式
+  - 无需依赖 Python，提高性能和易用性
+
 ## 0.5.0
 
 - Fix TCP connection crash when `SSLKEYLOGFILE` is set (for QUIC).

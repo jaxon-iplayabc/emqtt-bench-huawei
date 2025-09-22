@@ -99,6 +99,8 @@
           "username for connecting to server, support '%i', '%rand_N' variables"},
          {password, $P, "password", string,
           "password for connecting to server"},
+         {huawei_auth, undefined, "huawei-auth", boolean,
+          "enable Huawei Cloud IoT authentication (ClientID and password generation)"},
          {keepalive, $k, "keepalive", {integer, 300},
           "keep alive in seconds"},
          {clean, $C, "clean", {boolean, true},
@@ -138,7 +140,7 @@
           "interval of publishing message(ms)"},
          {topic, $t, "topic", string,
           "topic to publish, support %u (username), %c (client ID), %i (client seqno), "
-          "%s (message seqno), and %rand_N (random number) variables. "
+          "%s (message seqno), %d (device ID, defaults to username), and %rand_N (random number) variables. "
           "%rand_M (e.g. %rand_10 or %rand_1000 is rendered using a random number at runtime."},
          {payload_hdrs, undefined, "payload-hdrs", {string, ""},
           " If set, add optional payload headers."
@@ -185,7 +187,7 @@
 -define(SUB_OPTS, ?COMMON_OPTS ++
         [
          {topic, $t, "topic", string,
-          "topic subscribe, support %u (username), %c (client ID), %i (client seqno) variables"},
+          "topic subscribe, support %u (username), %c (client ID), %i (client seqno), %d (device ID) variables"},
          {payload_hdrs, undefined, "payload-hdrs", {string, []},
           "Handle the payload header from received message. "
           "Publish side must have the same option enabled in the same order. "
@@ -579,10 +581,12 @@ connect(Parent, N, PubSub, Opts) ->
         ++ [{quic_opts, quic_opts(Opts, ClientId)}]
         ++ session_property_opts(Opts)
         ++ mqtt_opts(Opts),
+    %% 华为云认证：直接使用 mqtt_opts 中设置的 username
+    MqttOpts0_1 = MqttOpts0,
     MqttOpts1 =
         case PubSub of
-            conn -> [{force_ping, true} | MqttOpts0];
-            _ -> MqttOpts0
+            conn -> [{force_ping, true} | MqttOpts0_1];
+            _ -> MqttOpts0_1
         end,
     MqttOpts =
         case proplists:get_bool(ws, Opts) of
@@ -951,7 +955,15 @@ mqtt_opts([{username, Username0}|Opts], Acc) ->
     Username = feed_username_var(Username0),
     mqtt_opts(Opts, [{username, bin(Username)}|Acc]);
 mqtt_opts([{password, Password}|Opts], Acc) ->
-    mqtt_opts(Opts, [{password, list_to_binary(Password)}|Acc]);
+    %% 支持华为云密码格式：huawei:<secret>
+    BinPassword = case Password of
+        "huawei:" ++ Secret ->
+            %% 使用华为云密码生成算法
+            huawei_auth:get_password(Secret);
+        _ ->
+            list_to_binary(Password)
+    end,
+    mqtt_opts(Opts, [{password, BinPassword}|Acc]);
 mqtt_opts([{keepalive, I}|Opts], Acc) ->
     mqtt_opts(Opts, [{keepalive, I}|Acc]);
 mqtt_opts([{clean, Bool}|Opts], Acc) ->
@@ -1077,8 +1089,21 @@ connect_fun(Opts)->
     end.
 
 client_id(PubSub, N, Opts) ->
-    Prefix = client_id_prefix(PubSub, Opts),
-    iolist_to_binary([Prefix, integer_to_list(N)]).
+    case proplists:get_value(huawei_auth, Opts) of
+        true ->
+            %% 使用华为云 ClientID 格式
+            %% 直接使用处理后的 username
+            Username = case proplists:get_value(username, Opts) of
+                undefined -> iolist_to_binary(["device_", integer_to_list(N)]);
+                U -> feed_var(bin(U), [{seq, N} | Opts])
+            end,
+            huawei_auth:get_client_id(Username);
+        _ ->
+            %% 默认 ClientID 生成方式
+            Prefix = client_id_prefix(PubSub, Opts),
+            iolist_to_binary([Prefix, integer_to_list(N)])
+    end.
+
 
 client_id_prefix(PubSub, Opts) ->
     case {proplists:get_value(shortids, Opts), proplists:get_value(prefix, Opts)} of
