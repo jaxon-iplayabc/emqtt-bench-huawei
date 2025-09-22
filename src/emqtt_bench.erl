@@ -56,7 +56,7 @@
           "mqtt server hostname or comma-separated hostnames"},
          {port, $p, "port", {integer, 1883},
           "mqtt server port number"},
-         {version, $V, "version", {integer, 5},
+         {version, $V, "version", {integer, 3},
           "mqtt protocol version: 3 | 4 | 5"},
          {count, $c, "count", {integer, 200},
           "max count of clients"},
@@ -581,8 +581,15 @@ connect(Parent, N, PubSub, Opts) ->
         ++ [{quic_opts, quic_opts(Opts, ClientId)}]
         ++ session_property_opts(Opts)
         ++ mqtt_opts(Opts),
-    %% 华为云认证：直接使用 mqtt_opts 中设置的 username
-    MqttOpts0_1 = MqttOpts0,
+    %% 华为云认证：确保 username 为设备ID
+    MqttOpts0_1 = case proplists:get_bool(huawei_auth, Opts) of
+        true ->
+            DeviceId = get_huawei_device_id(N, Opts),
+            NewOpts = lists:keystore(username, 1, MqttOpts0, {username, DeviceId}),
+            NewOpts;
+        false ->
+            MqttOpts0
+    end,
     MqttOpts1 =
         case PubSub of
             conn -> [{force_ping, true} | MqttOpts0_1];
@@ -1092,18 +1099,34 @@ client_id(PubSub, N, Opts) ->
     case proplists:get_value(huawei_auth, Opts) of
         true ->
             %% 使用华为云 ClientID 格式
-            %% 直接使用处理后的 username
-            Username = case proplists:get_value(username, Opts) of
-                undefined -> iolist_to_binary(["device_", integer_to_list(N)]);
-                U -> feed_var(bin(U), [{seq, N} | Opts])
-            end,
-            huawei_auth:get_client_id(Username);
+            %% 获取设备ID（用作 username）
+            DeviceId = get_huawei_device_id(N, Opts),
+            huawei_auth:get_client_id(DeviceId);
         _ ->
             %% 默认 ClientID 生成方式
             Prefix = client_id_prefix(PubSub, Opts),
             iolist_to_binary([Prefix, integer_to_list(N)])
     end.
 
+
+%% 获取华为云设备ID
+%% 优先级：username > prefix-序号 > 默认格式
+get_huawei_device_id(N, Opts) ->
+    case proplists:get_value(username, Opts) of
+        undefined ->
+            %% 没有指定 username，使用 prefix 生成
+            case proplists:get_value(prefix, Opts) of
+                undefined ->
+                    %% 默认格式
+                    iolist_to_binary(io_lib:format("device-~9..0B", [N]));
+                Prefix ->
+                    %% 使用 prefix + 9位数字
+                    iolist_to_binary(io_lib:format("~s-~9..0B", [Prefix, N]))
+            end;
+        Username ->
+            %% 使用指定的 username，处理其中的变量
+            feed_var(bin(Username), [{seq, N} | Opts])
+    end.
 
 client_id_prefix(PubSub, Opts) ->
     case {proplists:get_value(shortids, Opts), proplists:get_value(prefix, Opts)} of

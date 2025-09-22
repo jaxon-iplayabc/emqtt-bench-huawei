@@ -1,12 +1,23 @@
 # emqtt-bench changelog
 
-## 时间戳修复 (2024-11-19) - by Jaxon
+## --prefix 参数支持华为云设备ID (2024-11-19) - by Jaxon
+
+### 新功能
+- **支持使用 --prefix 参数设置华为云设备ID前缀**：
+  - 设备ID格式：`{prefix}-{9位数字}`（如：Speaker-000000001）
+  - 优先级：`-u` 参数 > `--prefix` 参数 > 默认格式
+  - 简化了华为云测试命令，无需复杂的 `-u` 模板
 
 ### Bug 修复
 - **修复华为云认证时间戳问题**：
   - 问题：Erlang 模块使用 UTC 时间，而 Python 使用本地时间，导致时间戳不一致
   - 修复：将 `huawei_auth:get_timestamp/0` 改为使用 `calendar:local_time()`
-  - 影响：修复后可以正确连接华为云 IoT 平台
+- **修复 MQTT 协议版本问题**：
+  - 问题：默认使用 MQTT v5，华为云不支持
+  - 修复：将默认协议版本改为 MQTT v3.1.1
+- **修复 Username 设置问题**：
+  - 问题：`lists:keyreplace` 无法添加不存在的字段
+  - 修复：使用 `lists:keystore` 来添加或替换 username 字段
 
 ## 华为云集成更新 (2024-11-18) - by Jaxon
 
