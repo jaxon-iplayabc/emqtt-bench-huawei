@@ -154,7 +154,7 @@
           "Set the message content for publish. "
           "Either a literal message content, or path to a file with payload template "
           "specified via 'template://<file_path>'. "
-          "Available variables: %TIMESTAMP%, %TIMESTAMPMS%, %TIMESTAMPUS%, %TIMESTAMPNS%, %UNIQUE%, %RANDOM%. "
+          "Available variables: %TIMESTAMP%, %TIMESTAMPMS%, %TIMESTAMPUS%, %TIMESTAMPNS%, %UNIQUE%, %RANDOM%, %RAND_INT_N%, %RAND_BOOL%, %RAND_SSID%. "
           "When using 'template://', --size option does not have effect except for when %RANDOM% placeholder "
           "is used."
          },
@@ -869,17 +869,24 @@ publish(Client, Opts) ->
                       TsUS = integer_to_binary(erlang:convert_time_unit(Now, nanosecond, microsecond)),
                       TsMS = integer_to_binary(erlang:convert_time_unit(Now, nanosecond, millisecond)),
                       Unique = integer_to_binary(erlang:unique_integer()),
-                      Substitutions =
+                      Substitutions = 
                           #{ <<"%TIMESTAMP%">> => TsMS
                            , <<"%TIMESTAMPMS%">> => TsMS
                            , <<"%TIMESTAMPUS%">> => TsUS
                            , <<"%TIMESTAMPNS%">> => TsNS
                            , <<"%UNIQUE%">> => Unique
                            , <<"%RANDOM%">> => rand:bytes(Size)
+                           , <<"%RAND_BOOL%">> => case rand:uniform(2) of 1 -> <<"true">>; 2 -> <<"false">> end
+                           , <<"%RAND_SSID%">> => list_to_binary(["WiFi_", integer_to_list(rand:uniform(9999))])
                            },
+                      %% 处理 %RAND_INT_N% 占位符（N是最大值）
+                      Bin1 = binary:replace(Bin, <<"%RAND_INT_100%">>, integer_to_binary(rand:uniform(100)), [global]),
+                      Bin2 = binary:replace(Bin1, <<"%RAND_INT_1000%">>, integer_to_binary(rand:uniform(1000)), [global]),
+                      Bin3 = binary:replace(Bin2, <<"%RAND_INT_10000%">>, integer_to_binary(rand:uniform(10000)), [global]),
+                      Bin4 = binary:replace(Bin3, <<"%RAND_INT_100000%">>, integer_to_binary(rand:uniform(100000)), [global]),
                       maps:fold(
-                        fun(Placeholder, Val, Acc) -> binary:replace(Acc, Placeholder, Val) end,
-                        Bin,
+                        fun(Placeholder, Val, Acc) -> binary:replace(Acc, Placeholder, Val, [global]) end,
+                        Bin4,
                         Substitutions);
                   _ ->
                       Payload0
@@ -1125,8 +1132,12 @@ get_huawei_device_id(N, Opts) ->
                     iolist_to_binary(io_lib:format("~s-~9..0B", [Prefix, N]))
             end;
         Username ->
-            %% 使用指定的 username，处理其中的变量
-            feed_var(bin(Username), [{seq, N} | Opts])
+            %% 使用指定的 username，但避免递归调用feed_var
+            %% 直接处理简单的变量替换
+            UsernameBin = bin(Username),
+            %% 只处理 %i 变量，避免递归
+            ProcessedUsername = binary:replace(UsernameBin, <<"%i">>, integer_to_binary(N), [global]),
+            ProcessedUsername
     end.
 
 client_id_prefix(PubSub, Opts) ->
@@ -1170,7 +1181,24 @@ feed_var(Topic, Opts) when is_binary(Topic) ->
     %% device_id 默认使用 username，除非明确指定
     DeviceIdFn = fun() ->
         case proplists:get_value(device_id, Opts) of
-            undefined -> bin(proplists:get_value(username, Opts));
+            undefined -> 
+                %% 在华为云认证模式下，username 就是 device_id
+                case proplists:get_bool(huawei_auth, Opts) of
+                    true ->
+                        %% 使用华为云设备ID生成逻辑
+                        N = proplists:get_value(seq, Opts, 1),
+                        get_huawei_device_id(N, Opts);
+                    false ->
+                        %% 非华为云模式，使用username，如果username为undefined则使用默认值
+                        case proplists:get_value(username, Opts) of
+                            undefined -> 
+                                %% 使用默认设备ID格式
+                                N = proplists:get_value(seq, Opts, 1),
+                                iolist_to_binary(io_lib:format("device-~9..0B", [N]));
+                            Username -> 
+                                bin(Username)
+                        end
+                end;
             DeviceId -> bin(DeviceId)
         end
     end,

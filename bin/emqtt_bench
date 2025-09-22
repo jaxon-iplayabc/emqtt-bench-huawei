@@ -2,9 +2,9 @@
 set -e
 
 ## constants from relx template
-RUNNER_ROOT_DIR="{{ runner_root_dir }}"
-RUNNER_ESCRIPT_DIR="{{ runner_escript_dir }}"
-ERTS_VSN="{{ erts_vsn }}"
+RUNNER_ROOT_DIR="$(cd $(dirname $(readlink $0 || echo $0))/..; pwd -P)"
+RUNNER_ESCRIPT_DIR="$RUNNER_ROOT_DIR/escript"
+ERTS_VSN="15.2.7.2"
 
 ERTS_PATH=$RUNNER_ROOT_DIR/erts-$ERTS_VSN/bin
 
