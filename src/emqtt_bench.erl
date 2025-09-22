@@ -962,12 +962,13 @@ mqtt_opts([{username, Username0}|Opts], Acc) ->
     Username = feed_username_var(Username0),
     mqtt_opts(Opts, [{username, bin(Username)}|Acc]);
 mqtt_opts([{password, Password}|Opts], Acc) ->
-    %% 支持华为云密码格式：huawei:<secret>
-    BinPassword = case Password of
-        "huawei:" ++ Secret ->
-            %% 使用华为云密码生成算法
-            huawei_auth:get_password(Secret);
-        _ ->
+    %% 根据 --huawei-auth 参数决定密码处理方式
+    BinPassword = case proplists:get_bool(huawei_auth, Opts) of
+        true ->
+            %% 华为云认证：使用密码作为设备密钥生成认证密码
+            huawei_auth:get_password(Password);
+        false ->
+            %% 普通认证：直接使用原始密码
             list_to_binary(Password)
     end,
     mqtt_opts(Opts, [{password, BinPassword}|Acc]);
@@ -1166,9 +1167,17 @@ topic_opt(Opts) ->
 
 feed_var(Topic, Opts) when is_binary(Topic) ->
     ValFn = fun(Key) -> fun() -> bin(proplists:get_value(Key, Opts)) end end,
+    %% device_id 默认使用 username，除非明确指定
+    DeviceIdFn = fun() ->
+        case proplists:get_value(device_id, Opts) of
+            undefined -> bin(proplists:get_value(username, Opts));
+            DeviceId -> bin(DeviceId)
+        end
+    end,
     Lookups = #{<<"%i">> => ValFn(seq),
                 <<"%c">> => ValFn(client_id),
                 <<"%u">> => ValFn(username),
+                <<"%d">> => DeviceIdFn,
                 <<"%s">> => fun() -> bin(get_counter(pub) + 1) end
                },
     join(lists:map(fun(W) -> render(W, Lookups) end, words(Topic))).
