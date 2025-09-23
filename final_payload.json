@@ -1,0 +1,57 @@
+[
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "playing": {
+                "id": 89545,
+                "current": 92,
+                "total": 92
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "battery": {
+                "electricity": 39,
+                "charging": false
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "storage": {
+                "sd_free": 4873,
+                "sd_total": 4873
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "settings": {
+                "autoUpgrade": false,
+                "log": true,
+                "vol": 39
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "report_file": {
+                "num": 39
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "wifi": {
+                "rssi": -39,
+                "ssid": "WiFi_4671"
+            }
+        }
+    }
+]
