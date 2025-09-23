@@ -1,5 +1,72 @@
 # emqtt-bench changelog
 
+## Prometheus 监控和压测结果收集指南 (2024-12-19) - by Jaxon
+
+### 脚本优化
+- **优化 prometheus_example.sh 脚本**：
+  - 直接内置华为云IoT平台配置参数，无需设置环境变量
+  - 默认客户端数量调整为5个，适合快速测试
+  - 华为云测试参数：服务器、设备前缀、密钥已预设
+  - 使用华为云payload模板文件进行真实数据测试
+  - **新增交互式菜单**：用户可选择运行特定测试类型
+  - **新增自定义测试选项**：支持用户自定义客户端数量、消息间隔、持续时间等参数
+  - **智能报告生成**：根据实际运行的测试生成相应的测试报告
+
+### Python 指标收集工具
+- **新增 metrics/ 目录**：
+  - 完整的 Python 项目，使用 uv 进行依赖管理
+  - `metrics_collector.py`: 主要的指标收集和分析工具
+  - `example_usage.py`: 使用示例和演示代码
+  - `quick_start.sh`: 快速开始脚本
+  - 支持 JSON 和 CSV 格式数据导出
+  - 实时监控和批量收集功能
+  - 专门优化华为云 IoT 平台指标收集
+
+### 新增文档
+- **Prometheus 监控指南** (`PROMETHEUS_MONITORING_GUIDE.md`)：
+  - 详细介绍如何配置和使用 Prometheus 监控功能
+  - 包含完整的指标说明和配置示例
+  - 提供 Grafana 仪表板配置建议
+  - 涵盖华为云 IoT 平台监控场景
+- **压测结果收集指南** (`BENCHMARK_RESULTS_COLLECTION.md`)：
+  - 多种结果收集方式：控制台输出、QoE 监控、Prometheus 指标、日志文件
+  - 华为云 IoT 平台测试结果收集脚本
+  - 结果分析和报告生成工具
+  - 最佳实践和故障排除指南
+- **Prometheus 示例脚本** (`prometheus_example.sh`)：
+  - 完整的 Prometheus 监控示例脚本
+  - 支持连接、发布、订阅测试
+  - 自动生成测试报告和指标收集
+  - 支持华为云 IoT 平台测试
+
+### 功能说明
+- **Prometheus 指标收集**：
+  - 连接统计：连接数、连接成功率、连接失败数
+  - 消息统计：发布消息数、订阅消息数、消息吞吐量
+  - 延迟统计：TCP握手延迟、MQTT握手延迟、连接延迟、订阅延迟
+  - QoE指标：端到端质量体验指标
+- **HTTP API 端点**：
+  - 提供 `/metrics` 端点供 Prometheus 抓取
+  - 支持自定义监听地址和端口
+  - 输出标准的 Prometheus 文本格式
+- **结果收集方式**：
+  - 控制台实时统计输出
+  - QoE 质量体验监控和日志记录
+  - Prometheus 指标导出
+  - 日志文件保存和分析
+
+### 使用方法
+```bash
+# 启用 Prometheus 监控
+./emqtt_bench pub -c 100 -I 1000 -t "test/topic" --prometheus --restapi 8080
+
+# 启用 QoE 监控
+./emqtt_bench pub -c 100 -I 1000 -t "test/topic" --qoe true --qoelog /tmp/qoe.log
+
+# 运行完整示例
+./prometheus_example.sh
+```
+
 ## 随机值占位符增强 (2024-11-19) - by Jaxon
 
 ### 新功能
