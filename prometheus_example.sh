@@ -48,7 +48,7 @@ HOST="${MQTT_HOST:-016bc9ac7b.st1.iotda-device.cn-north-4.myhuaweicloud.com}"
 PORT="${MQTT_PORT:-1883}"
 CLIENT_COUNT="${CLIENT_COUNT:-5}"
 MSG_INTERVAL="${MSG_INTERVAL:-1000}"
-PROMETHEUS_PORT="${PROMETHEUS_PORT:-8080}"
+PROMETHEUS_PORT="${PROMETHEUS_PORT:-9090}"
 
 # 华为云配置参数
 HUAWEI_HOST="016bc9ac7b.st1.iotda-device.cn-north-4.myhuaweicloud.com"
@@ -73,6 +73,34 @@ if [ ! -f "./emqtt_bench" ]; then
     echo "请确保在项目根目录下运行此脚本"
     exit 1
 fi
+
+# 检查端口是否被占用
+check_port() {
+    local port=$1
+    if lsof -i :$port >/dev/null 2>&1; then
+        echo -e "${RED}警告: 端口 $port 已被占用${NC}"
+        echo "占用端口的进程:"
+        lsof -i :$port
+        echo ""
+        read -p "是否要杀死占用端口的进程? (y/N): " kill_process
+        if [[ $kill_process =~ ^[Yy]$ ]]; then
+            echo "正在杀死占用端口 $port 的进程..."
+            lsof -ti :$port | xargs kill -9 2>/dev/null
+            sleep 2
+            echo -e "${GREEN}端口 $port 已释放${NC}"
+        else
+            echo -e "${YELLOW}请手动释放端口或使用其他端口${NC}"
+            exit 1
+        fi
+    fi
+}
+
+# 检查所有可能使用的端口
+echo -e "${YELLOW}检查端口占用情况...${NC}"
+for port in $PROMETHEUS_PORT $((PROMETHEUS_PORT + 1)) $((PROMETHEUS_PORT + 2)) $((PROMETHEUS_PORT + 3)) $((PROMETHEUS_PORT + 4)); do
+    check_port $port
+done
+echo ""
 
 # 函数：启动压测并监控
 start_benchmark_with_monitoring() {
@@ -138,6 +166,9 @@ run_connection_test() {
             -p $PORT \
             -c $CLIENT_COUNT \
             -i 10 \
+            --prefix "speaker" \
+            -P '12345678' \
+            --huawei-auth \
             --prometheus \
             --restapi $PROMETHEUS_PORT \
             --qoe true" \
@@ -154,7 +185,10 @@ run_publish_test() {
             -c $CLIENT_COUNT \
             -i 10 \
             -I $MSG_INTERVAL \
-            -t 'test/topic/%i' \
+            -t '\$oc/devices/%d/sys/properties/report' \
+            --prefix "speaker" \
+            -P '12345678' \
+            --message 'template://./huawei_cloud_payload_template.json' \
             --prometheus \
             --restapi $((PROMETHEUS_PORT + 1)) \
             --qoe true" \

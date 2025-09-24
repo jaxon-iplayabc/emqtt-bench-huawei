@@ -27,10 +27,10 @@ echo "1. 基本指标收集:"
 echo "   uv run metrics_collector.py collect --summary"
 echo ""
 echo "2. 实时监控:"
-echo "   uv run metrics_collector.py monitor --port 8080"
+echo "   uv run metrics_collector.py monitor --port 9090"
 echo ""
 echo "3. 华为云测试监控:"
-echo "   uv run metrics_collector.py collect --ports 8083 --summary"
+echo "   uv run metrics_collector.py collect --ports 9093 --summary"
 echo ""
 echo "4. 运行示例:"
 echo "   uv run example_usage.py"
@@ -40,11 +40,11 @@ echo ""
 
 # 检查是否有 eMQTT-Bench 在运行
 echo "检查 eMQTT-Bench 服务..."
-if curl -s http://localhost:8080/metrics > /dev/null 2>&1; then
-    echo "✅ 发现端口 8080 的 eMQTT-Bench 服务"
+if curl -s http://localhost:9090/metrics > /dev/null 2>&1; then
+    echo "✅ 发现端口 9090 的 eMQTT-Bench 服务"
     echo ""
     echo "开始收集指标..."
-    uv run metrics_collector.py collect --ports 8080 --summary
+    uv run metrics_collector.py collect --ports 9090 --summary
 else
     echo "❌ 未发现 eMQTT-Bench 服务"
     echo ""

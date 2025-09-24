@@ -244,3 +244,34 @@ emqtt_bench_pub, emqtt_bench_sub scripts
 
 first public release
 
+
+
+## [2025-09-23] - 连接测试数据分析器
+
+### 新增
+- 创建了专门的连接测试数据分析器 \`connection_test_analyzer.py\`
+- 添加了 \`analyze_connection_tests.sh\` - 连接测试分析快速启动脚本
+- 支持多文件Prometheus指标数据对比分析
+- 自动生成专业的HTML报告，包含统计图表和详细分析
+- 支持直方图数据解析和统计计算
+- 生成多种可视化图表：成功率对比、性能趋势、错误分析、系统资源使用
+
+### 功能特点
+- 解析Prometheus文本格式指标数据
+- 计算连接成功率、平均握手时间、平均连接时间等关键指标
+- 生成丰富的可视化图表：柱状图、趋势图、错误分析图
+- 创建响应式HTML报告，支持移动端查看
+- 提供详细的性能分析和建议
+- 支持命令行参数，可自定义输出目录
+
+### 使用示例
+\`\`\`bash
+# 分析单个文件
+python3 connection_test_analyzer.py metrics_connection_20250923_172051.txt
+
+# 分析多个文件进行对比
+python3 connection_test_analyzer.py metrics_connection_*.txt
+
+# 使用快速启动脚本
+./analyze_connection_tests.sh
+\`\`\`
