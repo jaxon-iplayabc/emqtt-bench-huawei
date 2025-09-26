@@ -101,6 +101,8 @@
           "password for connecting to server"},
          {huawei_auth, undefined, "huawei-auth", boolean,
           "enable Huawei Cloud IoT authentication (ClientID and password generation)"},
+         {device_id, undefined, "device-id", string,
+          "device ID for topic rendering (defaults to username), supports %i variable"},
          {keepalive, $k, "keepalive", {integer, 300},
           "keep alive in seconds"},
          {clean, $C, "clean", {boolean, true},

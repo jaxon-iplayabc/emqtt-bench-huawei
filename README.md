@@ -10,7 +10,7 @@ You can download pre-built binary packeges from https://github.com/emqx/emqtt-be
 
 ## Build from source code
 
-NOTE: Requires **Erlang/OTP 22.3+** to build.
+NOTE: Requires **Erlang/OTP 27.2+** to build.
 
 ### Install dependencies
 
@@ -56,7 +56,7 @@ Usage: emqtt_bench conn [--help <help>] [-d <dist>] [-h [<host>]] [-p [<port>]] 
   -d, --dist                 enable distribution port
   -h, --host                 mqtt server hostname or comma-separated hostnames [default: localhost]
   -p, --port                 mqtt server port number [default: 1883]
-  -V, --version              mqtt protocol version: 3 | 4 | 5 [default: 5]
+  -V, --version              mqtt protocol version: 3 | 4 | 5 [default: 3]
   -c, --count                max count of clients [default: 200]
   -R, --connrate             connection rate(/s), default: 0, fallback to use --interval [default: 0]
   -i, --interval             interval of connecting to the broker [default: 10]
@@ -132,7 +132,7 @@ Usage: emqtt_bench sub [--help <help>] [-d <dist>] [-h [<host>]] [-p [<port>]] [
   -d, --dist                 enable distribution port
   -h, --host                 mqtt server hostname or comma-separated hostnames [default: localhost]
   -p, --port                 mqtt server port number [default: 1883]
-  -V, --version              mqtt protocol version: 3 | 4 | 5 [default: 5]
+  -V, --version              mqtt protocol version: 3 | 4 | 5 [default: 3]
   -c, --count                max count of clients [default: 200]
   -R, --connrate             connection rate(/s), default: 0, fallback to use --interval [default: 0]
   -i, --interval             interval of connecting to the broker [default: 10]
@@ -216,7 +216,7 @@ Usage: emqtt_bench pub [--help <help>] [-d <dist>] [-h [<host>]] [-p [<port>]] [
   -d, --dist                    enable distribution port
   -h, --host                    mqtt server hostname or comma-separated hostnames [default: localhost]
   -p, --port                    mqtt server port number [default: 1883]
-  -V, --version                 mqtt protocol version: 3 | 4 | 5 [default: 5]
+  -V, --version                 mqtt protocol version: 3 | 4 | 5 [default: 3]
   -c, --count                   max count of clients [default: 200]
   -R, --connrate                connection rate(/s), default: 0, fallback to use --interval [default: 0]
   -i, --interval                interval of connecting to the broker [default: 10]
@@ -338,37 +338,29 @@ sudo sysctl -w net.ipv4.ip_local_port_range="1025 65534"
 
 This fork includes enhanced support for Huawei Cloud IoT Platform testing:
 
-### Device ID Support
-Use `%d` in topics to represent device ID:
+### Quick Start
 ```sh
 ./emqtt_bench pub \
-    -t '$oc/devices/%d/sys/properties/report' \
-    -u 'Speaker-%i' \
-    --device-id 'Device-%i'  # Optional, defaults to username
-```
-See `DEVICE_ID_GUIDE.md` for detailed documentation.
-
-### Native Erlang Authentication
-Use `--huawei-auth` option with password format `huawei:<secret>`:
-```sh
-./emqtt_bench pub \
-    -h mqtt.huaweicloud.com \
+    -h <华为云MQTT服务器地址> \
     -p 1883 \
     -c 100 \
     -t '$oc/devices/%u/sys/properties/report' \
-    -u 'Speaker-%i' \
-    -P 'huawei:12345678' \
+    --prefix "Speaker" \
+    -P "12345678" \
     --huawei-auth \
     -s 256
 ```
 
-See `HUAWEI_ERLANG_AUTH_GUIDE.md` for detailed documentation.
+### Key Features
+- **Native Erlang Authentication**: Use `--huawei-auth` for automatic authentication
+- **Device ID Support**: Use `%d` in topics to represent device ID
+- **Flexible Device Management**: Support `--prefix` and `--device-id` parameters
+- **Performance Monitoring**: Built-in Prometheus metrics and QoE tracking
 
-### Python Helper Scripts
-- `huawei/payload_generator.py` - Generate test payloads
-- `huawei/run_huawei_cloud_test.py` - Wrapper script for testing
-
-See `HUAWEI_CLOUD_TEST_GUIDE.md` for more information.
+### Documentation
+- [HUAWEI_CLOUD_GUIDE.md](HUAWEI_CLOUD_GUIDE.md) - Complete Huawei Cloud usage guide
+- [DEVICE_ID_GUIDE.md](DEVICE_ID_GUIDE.md) - Device ID parameter usage
+- [HUAWEI_ERLANG_AUTH_GUIDE.md](HUAWEI_ERLANG_AUTH_GUIDE.md) - Authentication mechanism details
 
 ## Author
 

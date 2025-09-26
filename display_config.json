@@ -1,0 +1,145 @@
+{
+  "display_system": {
+    "name": "eMQTT-Bench 压测结果显示系统",
+    "version": "1.0.0",
+    "author": "Jaxon",
+    "description": "提供实时监控、Web仪表盘和详细报告生成功能"
+  },
+  "prometheus": {
+    "default_ports": [9090, 9091, 9092, 9093, 9094],
+    "refresh_interval": 5,
+    "timeout": 10
+  },
+  "display_modes": {
+    "live": {
+      "description": "实时命令行显示",
+      "refresh_interval": 1.0,
+      "features": [
+        "实时性能指标",
+        "连接状态监控",
+        "消息吞吐量显示",
+        "延迟性能分析",
+        "错误统计",
+        "性能评级"
+      ]
+    },
+    "web": {
+      "description": "Web仪表盘",
+      "default_port": 8080,
+      "auto_open_browser": true,
+      "features": [
+        "响应式Web界面",
+        "实时数据更新",
+        "交互式图表",
+        "多设备访问",
+        "历史数据查看"
+      ]
+    },
+    "report": {
+      "description": "详细测试报告",
+      "output_format": "html",
+      "features": [
+        "性能摘要",
+        "趋势分析",
+        "对比分析",
+        "优化建议",
+        "数据导出"
+      ]
+    }
+  },
+  "metrics": {
+    "connection": {
+      "connect_succ": "成功连接数",
+      "connect_fail": "失败连接数",
+      "connect_retried": "重连次数",
+      "reconnect_succ": "重连成功数",
+      "connection_refused": "连接被拒绝数",
+      "connection_timeout": "连接超时数",
+      "unreachable": "网络不可达数"
+    },
+    "message": {
+      "pub": "发送消息数",
+      "pub_fail": "发送失败数",
+      "pub_succ": "发送成功数",
+      "recv": "接收消息数",
+      "sub": "订阅成功数",
+      "sub_fail": "订阅失败数",
+      "pub_overrun": "消息溢出数"
+    },
+    "latency": {
+      "publish_latency": "发布延迟",
+      "mqtt_client_tcp_handshake_duration": "TCP握手延迟",
+      "mqtt_client_handshake_duration": "MQTT握手延迟",
+      "mqtt_client_connect_duration": "连接建立延迟",
+      "mqtt_client_subscribe_duration": "订阅延迟",
+      "e2e_latency": "端到端延迟"
+    },
+    "system": {
+      "active_connections": "活跃连接数",
+      "cpu_usage": "CPU使用率",
+      "memory_usage": "内存使用率",
+      "network_usage": "网络使用率"
+    }
+  },
+  "performance_thresholds": {
+    "connection_success_rate": {
+      "excellent": 99,
+      "good": 95,
+      "warning": 80,
+      "critical": 50
+    },
+    "latency_ms": {
+      "excellent": 50,
+      "good": 100,
+      "warning": 500,
+      "critical": 1000
+    },
+    "error_rate_percent": {
+      "excellent": 0,
+      "good": 1,
+      "warning": 5,
+      "critical": 10
+    }
+  },
+  "recommendations": {
+    "high_latency": [
+      "检查网络连接质量",
+      "优化服务器配置",
+      "减少并发连接数",
+      "使用更快的网络连接"
+    ],
+    "high_error_rate": [
+      "检查服务器状态",
+      "验证认证配置",
+      "检查网络稳定性",
+      "调整重试策略"
+    ],
+    "low_throughput": [
+      "增加消息发送频率",
+      "优化消息大小",
+      "检查服务器性能",
+      "调整客户端配置"
+    ],
+    "connection_issues": [
+      "检查防火墙设置",
+      "验证端口配置",
+      "检查服务器负载",
+      "优化连接池设置"
+    ]
+  },
+  "huawei_cloud": {
+    "enabled": true,
+    "host": "016bc9ac7b.st1.iotda-device.cn-north-4.myhuaweicloud.com",
+    "port": 1883,
+    "device_prefix": "speaker",
+    "secret": "12345678",
+    "auth_method": "huawei-auth"
+  },
+  "usage_examples": {
+    "live_display": "python benchmark_display_system.py --mode live --test-type conn",
+    "web_dashboard": "python benchmark_display_system.py --mode web --web-port 8080",
+    "generate_report": "python benchmark_display_system.py --mode report --output report.html",
+    "custom_ports": "python benchmark_display_system.py --mode live --ports 9090 9091 9092"
+  }
+}
+

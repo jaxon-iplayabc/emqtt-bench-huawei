@@ -1,225 +1,242 @@
-# eMQTT-Bench Prometheus 指标收集工具
+# eMQTT-Bench 集成测试管理器
 
-这是一个用于收集和分析 eMQTT-Bench Prometheus 指标数据的 Python 工具。
+一个完整的 eMQTT-Bench 测试解决方案，集成了配置管理、测试执行、数据收集和报表生成功能。
 
-## 功能特性
+## 🚀 新功能亮点
 
-- 🔍 **指标收集**: 从多个端口收集 Prometheus 格式的指标数据
-- 📊 **数据分析**: 自动过滤和分析 eMQTT-Bench 相关指标
-- 💾 **数据导出**: 支持 JSON 和 CSV 格式导出
-- 📈 **实时监控**: 实时监控指标变化
-- 🎯 **华为云支持**: 专门支持华为云 IoT 平台测试指标
+- **一键测试**: 一个命令完成配置、测试、数据收集和报表生成
+- **智能配置**: 交互式配置界面，支持配置保存和加载
+- **进程管理**: 自动进程管理，支持 Ctrl+C 优雅退出
+- **实时监控**: 实时指标收集和状态监控
+- **丰富报表**: 自动生成 HTML 测试报告
+- **华为云优化**: 专门优化华为云 IoT 平台测试
 
-## 安装和设置
+## 🎯 快速开始
 
-### 1. 激活虚拟环境
+### 方法一：一键启动（推荐）
+
 ```bash
+# 进入 metrics 目录
 cd metrics/
-source .venv/bin/activate
+
+# 一键运行所有测试
+./quick_test.sh
 ```
 
-### 2. 安装依赖
+### 方法二：使用 uv
+
 ```bash
+# 安装依赖
 uv sync
+
+# 运行测试管理器
+uv run python emqtt_test_manager.py
+
+# 或使用简化版本
+uv run python main.py
 ```
 
-## 使用方法
+### 方法三：使用 Python
 
-### 基本命令
-
-#### 收集指标数据
 ```bash
-# 收集默认端口 (8080-8083) 的指标
-uv run metrics_collector.py collect
+# 激活虚拟环境
+source .venv/bin/activate
 
-# 收集指定端口的指标
-uv run metrics_collector.py collect --ports 8080 8081
-
-# 指定主机地址
-uv run metrics_collector.py collect --host 192.168.1.100
-
-# 只导出 JSON 格式
-uv run metrics_collector.py collect --format json
-
-# 显示指标摘要
-uv run metrics_collector.py collect --summary
+# 运行测试
+python emqtt_test_manager.py
 ```
 
-#### 实时监控
+## 📋 功能特性
+
+### 1. 集成测试管理器 (`emqtt_test_manager.py`)
+
+完整的测试管理解决方案：
+
+- **配置管理**: 交互式配置，支持保存和加载
+- **测试执行**: 支持连接、发布、订阅、华为云、自定义测试
+- **进程管理**: 自动进程跟踪和清理
+- **数据收集**: 自动收集 Prometheus 指标
+- **报表生成**: 生成详细的 HTML 测试报告
+
+### 2. 快速启动器 (`main.py`)
+
+简化版本，专注于核心功能：
+
+```python
+from emqtt_test_manager import EMQTTTestManager
+
+# 创建并运行测试管理器
+manager = EMQTTTestManager()
+manager.run()
+```
+
+### 3. 指标收集器 (`metrics_collector.py`)
+
+专业的指标收集和分析工具：
+
+- **实时收集**: 从 Prometheus 端点实时收集指标
+- **数据分析**: 解析和统计关键性能指标
+- **数据导出**: 支持 JSON 和 CSV 格式导出
+- **批量处理**: 支持批量收集多个端点的指标
+
+## 🛠️ 使用方法
+
+### 交互式配置
+
+运行测试管理器后，会引导您完成配置：
+
+1. **基础配置**:
+   - MQTT服务器地址和端口
+   - 客户端数量
+   - 消息间隔
+   - Prometheus端口
+
+2. **华为云配置**:
+   - 华为云IoT服务器地址
+   - 设备前缀
+   - 设备密钥
+
+3. **测试配置**:
+   - 测试持续时间
+   - emqtt_bench路径
+
+### 测试类型
+
+支持以下测试类型：
+
+1. **连接测试**: 测试MQTT连接建立
+2. **发布测试**: 测试消息发布性能
+3. **订阅测试**: 测试消息订阅性能
+4. **华为云测试**: 专门测试华为云IoT平台
+5. **自定义测试**: 用户自定义参数测试
+6. **全部测试**: 运行所有测试类型
+
+### 命令行选项
+
 ```bash
-# 监控端口 8080
-uv run metrics_collector.py monitor --port 8080
+# 使用自定义配置文件
+uv run python emqtt_test_manager.py --config my_config.json
 
-# 监控指定间隔和持续时间
-uv run metrics_collector.py monitor --port 8080 --interval 3 --duration 60
+# 交互式配置
+uv run python emqtt_test_manager.py --interactive
 ```
 
-#### 分析已保存的数据
-```bash
-# 分析 JSON 文件
-uv run metrics_collector.py analyze metrics_data/metrics_20241219_143022.json
-```
+## 📊 输出结果
 
-### 使用示例
+### 1. 指标数据文件
 
-#### 1. 华为云 IoT 平台测试监控
-```bash
-# 启动华为云测试 (在项目根目录)
-./prometheus_example.sh
+- `metrics_connection_YYYYMMDD_HHMMSS.txt`: 连接测试指标
+- `metrics_publish_YYYYMMDD_HHMMSS.txt`: 发布测试指标
+- `metrics_subscribe_YYYYMMDD_HHMMSS.txt`: 订阅测试指标
+- `metrics_huawei_publish_YYYYMMDD_HHMMSS.txt`: 华为云测试指标
 
-# 在另一个终端收集指标
-uv run metrics_collector.py collect --ports 8083 --summary
-```
+### 2. 配置文件
 
-#### 2. 实时监控所有测试
-```bash
-# 监控所有端口
-uv run metrics_collector.py monitor --port 8080 --interval 5
-```
+- `emqtt_test_config.json`: 测试配置（自动保存）
 
-#### 3. 批量收集和分析
-```bash
-# 收集所有端口数据并导出
-uv run metrics_collector.py collect --ports 8080 8081 8082 8083 --format both --summary
-```
+### 3. 测试报告
 
-## 指标说明
+- `test_report_YYYYMMDD_HHMMSS.html`: 详细的HTML测试报告
 
-### 连接相关指标
-- `mqtt_bench_connected`: 已建立的连接数
-- `mqtt_bench_connect_failed`: 连接失败数
-- `mqtt_bench_disconnected`: 断开连接数
+## 🔧 配置说明
 
-### 消息相关指标
-- `mqtt_bench_publish_sent`: 已发送的发布消息数
-- `mqtt_bench_publish_received`: 已接收的发布消息数
-- `mqtt_bench_publish_failed`: 发布失败数
-- `mqtt_bench_subscribe_sent`: 已发送的订阅消息数
-- `mqtt_bench_subscribe_received`: 已接收的订阅消息数
+### 配置文件格式
 
-### 延迟相关指标
-- `mqtt_client_tcp_handshake_duration`: TCP握手延迟
-- `mqtt_client_handshake_duration`: MQTT握手延迟
-- `mqtt_client_connect_duration`: 连接建立延迟
-- `mqtt_client_subscribe_duration`: 订阅延迟
-
-## 输出文件
-
-### JSON 格式
 ```json
 {
-  "8080": [
-    {
-      "timestamp": "2024-12-19T14:30:22.123456",
-      "name": "mqtt_bench_connected",
-      "value": 100.0,
-      "labels": {"port": "8080"},
-      "help_text": "Number of connected clients",
-      "metric_type": "counter"
-    }
-  ]
+  "host": "localhost",
+  "port": 1883,
+  "client_count": 5,
+  "msg_interval": 1000,
+  "prometheus_port": 9090,
+  "device_prefix": "speaker",
+  "huawei_secret": "12345678",
+  "use_huawei_auth": false,
+  "test_duration": 30,
+  "emqtt_bench_path": "./emqtt_bench"
 }
 ```
 
-### CSV 格式
-```csv
-timestamp,port,name,value,labels,help_text,metric_type
-2024-12-19T14:30:22.123456,8080,mqtt_bench_connected,100.0,"{""port"": ""8080""}",Number of connected clients,counter
-```
+### 环境变量
 
-## 编程接口
+- `HOST`: MQTT服务器地址
+- `PORT`: MQTT端口
+- `CLIENT_COUNT`: 客户端数量
+- `MSG_INTERVAL`: 消息间隔(ms)
+- `PROMETHEUS_PORT`: Prometheus起始端口
+- `USE_HUAWEI_AUTH`: 是否使用华为云认证
 
-### 基本使用
-```python
-from metrics_collector import PrometheusMetricsCollector, MetricsAnalyzer
+## 📈 指标说明
 
-# 创建收集器
-collector = PrometheusMetricsCollector("http://localhost")
+### 连接相关指标
 
-# 收集指标
-metrics = collector.fetch_metrics(8080)
+- `connect_succ`: 成功连接数
+- `connect_fail`: 连接失败数
+- `connect_retried`: 重试连接数
+- `connection_timeout`: 连接超时数
+- `connection_refused`: 连接被拒绝数
+- `unreachable`: 不可达连接数
 
-# 分析指标
-analyzer = MetricsAnalyzer()
-filtered = analyzer.filter_mqtt_bench_metrics(metrics)
-summary = analyzer.get_metric_summary(filtered)
-```
+### 性能相关指标
 
-### 运行示例
-```bash
-uv run example_usage.py
-```
+- `mqtt_client_handshake_duration`: MQTT握手延迟
+- `mqtt_client_connect_duration`: 连接建立延迟
+- `mqtt_client_tcp_handshake_duration`: TCP握手延迟
 
-## 与 eMQTT-Bench 集成
+## 🛡️ 安全特性
 
-### 1. 启动 eMQTT-Bench 测试
-```bash
-# 在项目根目录
-./prometheus_example.sh
-```
+- **进程管理**: 自动跟踪和清理所有测试进程
+- **信号处理**: 支持 Ctrl+C 优雅退出
+- **错误恢复**: 自动处理进程异常和端口冲突
+- **资源清理**: 测试结束后自动清理所有资源
 
-### 2. 收集指标
-```bash
-# 在 metrics 目录
-uv run metrics_collector.py collect --summary
-```
-
-### 3. 实时监控
-```bash
-uv run metrics_collector.py monitor --port 8080
-```
-
-## 故障排除
+## 🔍 故障排除
 
 ### 常见问题
 
-1. **连接被拒绝**
+1. **emqtt_bench 未找到**:
+   ```bash
+   # 确保在项目根目录运行
+   ls -la emqtt_bench
    ```
-   错误: 无法连接到 http://localhost:8080/metrics: Connection refused
-   ```
-   - 确保 eMQTT-Bench 正在运行
-   - 检查端口是否正确
-   - 确认使用了 `--prometheus` 和 `--restapi` 参数
 
-2. **没有找到指标**
+2. **端口被占用**:
+   ```bash
+   # 检查端口占用
+   lsof -i :9090
+   
+   # 或使用进程管理器清理
+   ./process_manager.sh cleanup
    ```
-   未找到 eMQTT-Bench 指标数据
-   ```
-   - 确保使用了 `--prometheus` 参数
-   - 检查测试是否正在运行
-   - 等待一段时间让指标数据积累
 
-3. **权限错误**
+3. **权限问题**:
+   ```bash
+   # 确保脚本有执行权限
+   chmod +x quick_test.sh
    ```
-   Permission denied
-   ```
-   - 确保有写入输出目录的权限
-   - 检查文件路径是否正确
 
-## 扩展功能
+### 调试模式
 
-### 自定义指标过滤
-```python
-# 只关注特定指标
-custom_metrics = ['mqtt_bench_connected', 'mqtt_bench_publish_sent']
-filtered = [m for m in metrics if m.name in custom_metrics]
+```bash
+# 启用详细输出
+uv run python emqtt_test_manager.py --debug
 ```
 
-### 数据可视化
-```python
-import matplotlib.pyplot as plt
+## 📚 相关文档
 
-# 绘制连接数趋势
-timestamps = [m.timestamp for m in metrics if m.name == 'mqtt_bench_connected']
-values = [m.value for m in metrics if m.name == 'mqtt_bench_connected']
-plt.plot(timestamps, values)
-plt.show()
-```
+- [进程管理指南](../PROCESS_MANAGEMENT_GUIDE.md)
+- [配置指南](../CONFIG_GUIDE.md)
+- [Prometheus监控指南](../PROMETHEUS_MONITORING_GUIDE.md)
 
-## 贡献
+## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request 来改进这个工具！
+欢迎提交 Issue 和 Pull Request！
 
-## 许可证
+## 📄 许可证
 
 MIT License
+
+---
+
+*作者: Jaxon*  
+*最后更新: 2024-12-19*

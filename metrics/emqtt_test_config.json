@@ -1,0 +1,12 @@
+{
+  "host": "016bc9ac7b.st1.iotda-device.cn-north-4.myhuaweicloud.com-",
+  "port": 1883,
+  "client_count": 5,
+  "msg_interval": 1000,
+  "prometheus_port": 9090,
+  "device_prefix": "speaker",
+  "huawei_secret": "12345678",
+  "use_huawei_auth": true,
+  "test_duration": 30,
+  "emqtt_bench_path": "../emqtt_bench"
+}

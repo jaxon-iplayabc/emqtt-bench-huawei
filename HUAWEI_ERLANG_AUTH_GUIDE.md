@@ -31,7 +31,7 @@
     -I 1000 \
     -t '$oc/devices/%d/sys/properties/report' \
     --device-id 'Speaker-%i' \
-    -P 'huawei:12345678' \
+    -P '12345678' \
     --huawei-auth \
     -s 256
 
@@ -43,13 +43,13 @@
     -I 1000 \
     -t '$oc/devices/%u/sys/properties/report' \
     -u 'Speaker-%i' \
-    -P 'huawei:12345678' \
+    -P '12345678' \
     --huawei-auth \
     -s 256
 ```
 
 参数说明：
-- `-P 'huawei:12345678'` - 使用华为云密码格式，`12345678` 是设备密钥
+- `-P '12345678'` - 设备密钥，使用 `--huawei-auth` 时会自动生成华为云认证密码
 - `--huawei-auth` - 启用华为云认证（自动处理 username = device_id）
 - `--device-id 'Speaker-%i'` - 设备ID（推荐使用）
 - `-u 'Speaker-%i'` - 当不指定 --device-id 时，作为设备ID使用
@@ -77,7 +77,7 @@
     -c 1000 \
     --prefix 'Speaker' \
     -u 'Speaker-%i' \
-    -P 'huawei:你的设备密钥' \
+    -P '你的设备密钥' \
     --huawei-auth
 ```
 
@@ -89,7 +89,7 @@
     -c 100 \
     -t '$oc/devices/+/sys/properties/report' \
     -u 'Speaker-%i' \
-    -P 'huawei:你的设备密钥' \
+    -P '你的设备密钥' \
     --huawei-auth
 ```
 
@@ -102,7 +102,7 @@
     -I 5000 \
     -t '$oc/devices/%u/sys/properties/report' \
     -u 'Speaker-%i' \
-    -P 'huawei:你的设备密钥' \
+    -P '你的设备密钥' \
     --huawei-auth \
     --message 'template://huawei_cloud_payload_template.json'
 ```
@@ -128,7 +128,7 @@
     -I 1000 \
     -t '$oc/devices/%u/sys/properties/report' \
     -u 'Speaker-%i' \
-    -P 'huawei:12345678' \
+    -P '12345678' \
     --huawei-auth \
     -s 256
 ```
@@ -169,7 +169,7 @@
     -c 100 \
     --topics-payload huawei_cloud_topics.json \
     -u 'Speaker-%i' \
-    -P 'huawei:12345678' \
+    -P '12345678' \
     --huawei-auth
 ```
 
