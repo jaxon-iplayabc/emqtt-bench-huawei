@@ -17,6 +17,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
+
+def get_huawei_template_path() -> str:
+    """获取华为云模板文件的绝对路径"""
+    # 获取当前文件所在目录的父目录（项目根目录）
+    current_dir = Path(__file__).parent
+    project_root = current_dir
+    template_path = project_root / "huawei_cloud_payload_template.json"
+    return str(template_path.absolute())
 import click
 from rich.console import Console
 from rich.table import Table
@@ -45,6 +53,17 @@ class TestConfig:
     device_prefix: str = "speaker"
     huawei_secret: str = "12345678"
     use_huawei_auth: bool = False  # 是否使用华为云认证
+    
+    # 华为云广播测试参数
+    huawei_ak: str = ""  # 华为云访问密钥ID
+    huawei_sk: str = ""  # 华为云访问密钥Secret
+    huawei_endpoint: str = ""  # 华为云IoTDA端点
+    huawei_region: str = "cn-north-4"  # 华为云区域ID
+    broadcast_topic: str = "$oc/broadcast/test"  # 广播主题
+    broadcast_interval: int = 5  # 广播发送间隔（秒）
+    
+    # MQTT配置
+    qos: int = 1  # QoS等级，默认为1
     
     # 测试配置
     test_duration: int = 30
@@ -378,12 +397,13 @@ class TestExecutor:
         
         # 根据是否使用华为云认证设置不同的topic和参数
         if self.config.use_huawei_auth:
+            template_path = get_huawei_template_path()
             command += f""" \
             -t '$oc/devices/%d/sys/properties/report' \
             --prefix "{self.config.device_prefix}" \
             -P '{self.config.huawei_secret}' \
             --huawei-auth \
-            --message 'template://./huawei_cloud_payload_template.json'"""
+            --message 'template://{template_path}'"""
         else:
             command += f""" \
             -t 'test/topic/%i' \

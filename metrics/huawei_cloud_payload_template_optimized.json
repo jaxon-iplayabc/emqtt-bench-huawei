@@ -1,0 +1,34 @@
+{
+  "services": [
+    {
+      "service_id": "BasicData",
+      "properties": {
+        "device_status": {
+          "online": true,
+          "timestamp": "%TIMESTAMP%",
+          "device_id": "%DEVICE_ID%"
+        }
+      }
+    },
+    {
+      "service_id": "BasicData",
+      "properties": {
+        "performance": {
+          "cpu_usage": "%RAND_INT_100%",
+          "memory_usage": "%RAND_INT_100%",
+          "disk_usage": "%RAND_INT_100%"
+        }
+      }
+    },
+    {
+      "service_id": "BasicData",
+      "properties": {
+        "network": {
+          "signal_strength": "%RAND_INT_100%",
+          "connection_type": "wifi",
+          "ip_address": "%RAND_IP%"
+        }
+      }
+    }
+  ]
+}

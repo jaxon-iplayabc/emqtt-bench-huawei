@@ -15,6 +15,7 @@ import math
 import random
 import statistics
 from collections import defaultdict
+from utils import safe_divide, safe_percentage, safe_float, validate_metrics_data
 
 class EnhancedReportGenerator:
     """增强版HTML报告生成器"""
@@ -115,7 +116,7 @@ class EnhancedReportGenerator:
                     }
                 
                 # MQTT指标
-                elif any(keyword in metric_name for keyword in ['mqtt', 'publish', 'subscribe', 'message']):
+                elif any(keyword in metric_name for keyword in ['mqtt', 'publish', 'subscribe', 'message', 'pub', 'sub', 'handshake']):
                     analysis['mqtt_metrics'][metric.get('name', '')] = {
                         'value': metric_value,
                         'test': test_name,
@@ -154,17 +155,7 @@ class EnhancedReportGenerator:
     
     def _safe_float(self, value) -> float:
         """安全转换为浮点数"""
-        try:
-            if isinstance(value, (int, float)):
-                return float(value)
-            elif isinstance(value, str):
-                # 移除单位和其他非数字字符
-                import re
-                numbers = re.findall(r'-?\d+\.?\d*', value)
-                return float(numbers[0]) if numbers else 0.0
-            return 0.0
-        except (ValueError, TypeError):
-            return 0.0
+        return safe_float(value)
     
     def _generate_trend_data(self) -> Dict[str, List]:
         """生成趋势数据"""
@@ -213,7 +204,9 @@ class EnhancedReportGenerator:
         # 检查测试成功率
         total_tests = len(self.test_results)
         successful_tests = len([r for r in self.test_results if r.success])
-        success_rate = (successful_tests / total_tests * 100) if total_tests > 0 else 0
+        
+        # 使用安全函数计算成功率
+        success_rate = safe_percentage(successful_tests, total_tests)
         
         if success_rate < 100:
             alerts.append({

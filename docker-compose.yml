@@ -1,0 +1,9 @@
+services:
+  mqtt-stress-tool:
+    platform: linux/amd64
+    image: mqtt-stress-tool:20
+    volumes:
+      - ./aaa:/app:/reports
+#    command: /bin/sh
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t

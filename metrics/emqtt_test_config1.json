@@ -14,6 +14,6 @@
   "broadcast_topic": "$oc/broadcast/test",
   "broadcast_interval": 5,
   "qos": 1,
-  "test_duration": 60,
-  "emqtt_bench_path": "/Users/admin/Workspace/python/emqtt-bench-huawei/_build/emqtt_bench/bin/emqtt_bench"
+  "test_duration": 600,
+  "emqtt_bench_path": "emqtt_bench"
 }

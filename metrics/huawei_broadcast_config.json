@@ -1,0 +1,13 @@
+{
+  "mqtt_host": "016bc9ac7b.st1.iotda-device.cn-north-4.myhuaweicloud.com",
+  "mqtt_port": 1883,
+  "device_prefix": "speaker",
+  "device_secret": "12345678",
+  "huawei_ak": "YOUR_ACCESS_KEY",
+  "huawei_sk": "YOUR_SECRET_KEY",
+  "huawei_endpoint": "YOUR_IOTDA_ENDPOINT",
+  "huawei_region": "cn-north-4",
+  "broadcast_topic": "$oc/broadcast/test",
+  "broadcast_interval": 5,
+  "test_duration": 60
+}

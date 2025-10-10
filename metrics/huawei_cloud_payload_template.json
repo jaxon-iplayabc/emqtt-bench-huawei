@@ -1,0 +1,57 @@
+{"services":[
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "playing": {
+                "id": %RAND_INT_100000%,
+                "current": %RAND_INT_1000%,
+                "total": %RAND_INT_1000%
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "battery": {
+                "electricity": %RAND_INT_100%,
+                "charging": %RAND_BOOL%
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "storage": {
+                "sd_free": %RAND_INT_10000%,
+                "sd_total": %RAND_INT_10000%
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "settings": {
+                "autoUpgrade": %RAND_BOOL%,
+                "log": %RAND_BOOL%,
+                "vol": %RAND_INT_100%
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "report_file": {
+                "num": %RAND_INT_100%
+            }
+        }
+    },
+    {
+        "service_id": "BasicData",
+        "properties": {
+            "wifi": {
+                "rssi": -%RAND_INT_100%,
+                "ssid": "%RAND_SSID%"
+            }
+        }
+    }
+]}

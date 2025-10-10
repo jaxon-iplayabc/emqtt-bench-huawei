@@ -163,7 +163,7 @@
          {topics_payload, undefined, "topics-payload", string,
           "json file defining topics and payloads"},
          {qos, $q, "qos", {integer, 0},
-          "subscribe qos"},
+          "publish qos"},
          {retain, $r, "retain", {boolean, false},
           "retain message"},
          {limit, $L, "limit", {integer, 0},
@@ -743,7 +743,11 @@ loop(Parent, N, Client, PubSub, Opts) ->
         {'EXIT', _Client, Reason} ->
             io:format("client(~w): EXIT for ~p~n", [N, Reason]);
         {puback, _} ->
-            %% Publish success for QoS 1 (recv puback) and 2 (recv pubcomp)
+            %% Publish success for QoS 1 (recv puback)
+            inc_counter(Prometheus, pub_succ),
+            loop(Parent, N, Client, PubSub, Opts);
+        {pubcomp, _} ->
+            %% Publish success for QoS 2 (recv pubcomp)
             inc_counter(Prometheus, pub_succ),
             loop(Parent, N, Client, PubSub, Opts);
         {disconnected, ReasonCode, _Meta} ->
@@ -860,7 +864,9 @@ publish(Client, Opts) ->
     %% Ensure publish begin time is initialized right before the first publish,
     %% because the first publish may get delayed (after entering the loop)
     ok = ensure_publish_begin_time(),
-    Flags   = [{qos, proplists:get_value(qos, Opts)},
+    Qos = proplists:get_value(qos, Opts),
+    Prometheus = lists:member(prometheus, Opts),
+    Flags   = [{qos, Qos},
                {retain, proplists:get_value(retain, Opts)}],
     Size = proplists:get_value(payload_size, Opts),
     Payload0 = proplists:get_value(payload, Opts),
@@ -896,7 +902,14 @@ publish(Client, Opts) ->
     %% prefix dynamic headers.
     NewPayload = maybe_prefix_payload(Payload, Opts),
     case emqtt:publish(Client, topic_opt(Opts), NewPayload, Flags) of
+        ok when Qos =:= 0 ->
+            %% QoS 0: 立即统计为成功，无需等待确认
+            inc_counter(Prometheus, pub_succ),
+            ok;
         ok -> ok;
+        {ok, _} when Qos =:= 0 ->
+            inc_counter(Prometheus, pub_succ),
+            ok;
         {ok, _} -> ok;
         {error, Reason} -> {error, Reason}
     end.
@@ -911,6 +924,7 @@ publish_topic(Client, Topic, #{ name := TopicRendered
                               , stream_priority := StreamPriority
                               , payload_encoding := PayloadEncoding
                               }, ClientOpts) ->
+   Prometheus = lists:member(prometheus, ClientOpts),
    Payload1 = case TsUnit of
                    false -> PayloadTemplate;
                    _ -> PayloadTemplate#{<<"timestamp">> => erlang:system_time(TsUnit)}
@@ -929,7 +943,14 @@ publish_topic(Client, Topic, #{ name := TopicRendered
                            end, [self()]
                           }
                          ) of
+      ok when QoS =:= 0 ->
+         %% QoS 0: 立即统计为成功，无需等待确认
+         inc_counter(Prometheus, pub_succ),
+         ok;
       ok -> ok;
+      {ok, _} when QoS =:= 0 ->
+         inc_counter(Prometheus, pub_succ),
+         ok;
       {ok, _} -> ok;
       {error, Reason} ->
          logger:error("Publish Topic: ~p Err: ~p", [Topic, Reason]),
